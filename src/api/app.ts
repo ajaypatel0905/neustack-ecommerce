@@ -1,7 +1,11 @@
+import path from 'node:path';
 import express, { Express, NextFunction, Request, Response } from 'express';
 import { StoreService } from '../services/storeService';
 import { buildRouter } from './routes';
 import { errorHandler } from './errorHandler';
+
+/** Static demo client lives in /public at the repo root. */
+const PUBLIC_DIR = path.resolve(__dirname, '../../public');
 
 /**
  * Builds the Express app around a given StoreService. Taking the service as an
@@ -14,6 +18,9 @@ export function createApp(service: StoreService): Express {
   app.use(express.json());
 
   app.use('/api', buildRouter(service));
+
+  // Serve the static demo storefront at the root.
+  app.use(express.static(PUBLIC_DIR));
 
   // 404 for anything unmatched, expressed in the same error envelope.
   app.use((_req: Request, res: Response) => {

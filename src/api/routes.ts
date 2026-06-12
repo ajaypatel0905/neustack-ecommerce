@@ -16,6 +16,11 @@ export function buildRouter(service: StoreService): Router {
     res.json({ status: 'ok' });
   });
 
+  // Exposes the reward rule so clients can display it without side effects.
+  router.get('/config', (_req: Request, res: Response) => {
+    res.json(service.getConfig());
+  });
+
   // --- Catalog ---
   router.get('/products', (_req: Request, res: Response) => {
     res.json({ products: service.listProducts().map(serializeProduct) });

@@ -51,6 +51,11 @@ export class StoreService {
     private readonly config: StoreConfig,
   ) {}
 
+  /** The public reward configuration (safe to expose to clients). */
+  getConfig(): StoreConfig {
+    return this.config;
+  }
+
   listProducts(): Product[] {
     return this.store.listProducts();
   }

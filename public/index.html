@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Neustack Store — Demo</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="brand">
+        <span class="logo">◎</span>
+        <div>
+          <h1>Neustack Store</h1>
+          <p class="tagline">Demo storefront — exercises every API end to end</p>
+        </div>
+      </div>
+      <div id="reward-banner" class="reward-banner">Loading reward rule…</div>
+    </header>
+
+    <main class="layout">
+      <!-- Catalog -->
+      <section class="panel" aria-labelledby="catalog-h">
+        <h2 id="catalog-h">Catalog</h2>
+        <div id="products" class="product-grid"></div>
+      </section>
+
+      <!-- Cart + checkout -->
+      <section class="panel" aria-labelledby="cart-h">
+        <h2 id="cart-h">Your Cart</h2>
+        <div id="cart-meta" class="muted">No cart yet — add a product to begin.</div>
+        <ul id="cart-items" class="cart-list"></ul>
+
+        <div class="cart-summary">
+          <div class="row"><span>Subtotal</span><strong id="cart-subtotal">—</strong></div>
+        </div>
+
+        <div class="checkout-box">
+          <label for="discount-input">Discount code (optional)</label>
+          <input id="discount-input" type="text" placeholder="e.g. SAVE10-AB7XQK" autocomplete="off" />
+          <button id="checkout-btn" class="btn primary" disabled>Checkout</button>
+        </div>
+        <div id="order-result" class="result" hidden></div>
+      </section>
+
+      <!-- Admin -->
+      <section class="panel admin" aria-labelledby="admin-h">
+        <h2 id="admin-h">Admin</h2>
+        <p class="muted">
+          The store earns one coupon every <strong id="nth-label">n</strong> orders. Generate
+          it here, then paste it into checkout.
+        </p>
+        <div class="admin-actions">
+          <button id="generate-btn" class="btn">Generate discount code</button>
+          <button id="stats-btn" class="btn ghost">Refresh stats</button>
+        </div>
+        <div id="generate-result" class="result" hidden></div>
+
+        <h3>Stats</h3>
+        <div id="stats" class="stats-grid muted">Click “Refresh stats”.</div>
+        <table id="codes-table" class="codes" hidden>
+          <thead>
+            <tr><th>Code</th><th>%</th><th>Used</th></tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </section>
+    </main>
+
+    <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+    <footer class="footer">
+      <span>Single-page demo client · talks to <code>/api</code> · no framework, no build step.</span>
+    </footer>
+
+    <script src="./app.js"></script>
+  </body>
+</html>

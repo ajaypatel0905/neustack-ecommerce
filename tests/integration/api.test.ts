@@ -57,6 +57,17 @@ describe('API', () => {
     expect(stats.body.totalDiscountCents).toBe(250);
   });
 
+  it('exposes the reward config', async () => {
+    const res = await request(buildApp()).get('/api/config').expect(200);
+    expect(res.body).toEqual({ nthOrder: 2, discountPercentage: 10 });
+  });
+
+  it('serves the static demo storefront at the root', async () => {
+    const res = await request(buildApp()).get('/').expect(200);
+    expect(res.headers['content-type']).toMatch(/text\/html/);
+    expect(res.text).toContain('Neustack Store');
+  });
+
   it('returns 404 for an unknown cart', async () => {
     await request(buildApp()).get('/api/carts/missing').expect(404);
   });
