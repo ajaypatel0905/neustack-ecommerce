@@ -10,8 +10,12 @@
   const API = '/api';
   const $ = (sel) => document.querySelector(sel);
 
-  // Minimal client state: just the id of the currently-open cart.
+  // Minimal client state: the open cart's id + subtotal, and the reward % so we
+  // can preview a discounted total locally (the server stays authoritative at
+  // checkout — this is only an estimate while the user types a code).
   let cartId = null;
+  let cartSubtotalCents = 0;
+  let rewardPercentage = 0;
 
   // --- tiny fetch helper with a consistent error surface ---------------------
   async function api(path, { method = 'GET', body, headers } = {}) {
@@ -102,8 +106,39 @@
         </li>`,
       )
       .join('');
-    $('#cart-subtotal').textContent = money(cart.subtotalCents || 0);
+    cartSubtotalCents = cart.subtotalCents || 0;
+    $('#cart-subtotal').textContent = money(cartSubtotalCents);
     $('#checkout-btn').disabled = items.length === 0;
+    updateSummary();
+  }
+
+  // Mirror the server's rounding: round half-up to the nearest cent, clamped so
+  // the discount can never exceed the subtotal (see src/domain/money.ts).
+  function previewDiscountCents(subtotal) {
+    return Math.min(Math.round((subtotal * rewardPercentage) / 100), subtotal);
+  }
+
+  // Live discounted-total preview as the user types a code.
+  function updateSummary() {
+    const code = $('#discount-input').value.trim();
+    const discountRow = $('#discount-row');
+    const totalRow = $('#total-row');
+    const hint = $('#discount-hint');
+
+    if (code && cartSubtotalCents > 0 && rewardPercentage > 0) {
+      const discount = previewDiscountCents(cartSubtotalCents);
+      $('#discount-label').textContent = `Discount (${rewardPercentage}% est.)`;
+      $('#cart-discount').textContent = '−' + money(discount);
+      $('#cart-total').textContent = money(cartSubtotalCents - discount);
+      discountRow.hidden = false;
+      totalRow.hidden = false;
+      hint.textContent = 'Estimated — the code is verified by the server at checkout.';
+      hint.hidden = false;
+    } else {
+      discountRow.hidden = true;
+      totalRow.hidden = true;
+      hint.hidden = true;
+    }
   }
 
   async function checkout() {
@@ -184,6 +219,7 @@
   async function loadRewardRule() {
     try {
       const { nthOrder, discountPercentage } = await api('/config');
+      rewardPercentage = discountPercentage;
       $('#reward-banner').textContent =
         `Reward: 1 coupon of ${discountPercentage}% per ${nthOrder} orders`;
       $('#nth-label').textContent = String(nthOrder);
@@ -198,6 +234,7 @@
       const id = e.target.getAttribute('data-add');
       if (id) addToCart(id).catch((err) => toast(err.message, true));
     });
+    $('#discount-input').addEventListener('input', updateSummary);
     $('#checkout-btn').addEventListener('click', checkout);
     $('#generate-btn').addEventListener('click', generateCode);
     $('#stats-btn').addEventListener('click', () => refreshStats().catch((err) => toast(err.message, true)));

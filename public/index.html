@@ -34,11 +34,18 @@
 
         <div class="cart-summary">
           <div class="row"><span>Subtotal</span><strong id="cart-subtotal">—</strong></div>
+          <div class="row discount-row" id="discount-row" hidden>
+            <span id="discount-label">Discount</span><strong id="cart-discount">—</strong>
+          </div>
+          <div class="row total-row" id="total-row" hidden>
+            <span>Total</span><strong id="cart-total">—</strong>
+          </div>
         </div>
 
         <div class="checkout-box">
           <label for="discount-input">Discount code (optional)</label>
           <input id="discount-input" type="text" placeholder="e.g. SAVE10-AB7XQK" autocomplete="off" />
+          <p class="hint" id="discount-hint" hidden></p>
           <button id="checkout-btn" class="btn primary" disabled>Checkout</button>
         </div>
         <div id="order-result" class="result" hidden></div>

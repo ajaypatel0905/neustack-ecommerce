@@ -93,8 +93,11 @@ body {
   border-radius: 8px; padding: 0.5rem 0.7rem; font-size: 0.9rem;
 }
 .cart-list .qty { color: var(--muted); }
-.cart-summary { border-top: 1px dashed var(--border); margin-top: 0.6rem; padding-top: 0.6rem; }
+.cart-summary { border-top: 1px dashed var(--border); margin-top: 0.6rem; padding-top: 0.6rem; display: flex; flex-direction: column; gap: 0.25rem; }
 .row { display: flex; justify-content: space-between; }
+.discount-row { color: var(--accent-2); }
+.total-row { border-top: 1px solid var(--border); padding-top: 0.35rem; margin-top: 0.15rem; font-size: 1.05rem; }
+.hint { color: var(--muted); font-size: 0.75rem; margin: 0; }
 
 .checkout-box { margin-top: 0.9rem; display: flex; flex-direction: column; gap: 0.4rem; }
 .checkout-box label { font-size: 0.82rem; color: var(--muted); }
