@@ -69,6 +69,11 @@ npm run build && npm start
 Then open **http://localhost:3000** for the demo storefront, or hit the API under
 `/api` directly (curl / Postman).
 
+> **One command runs everything.** The frontend and backend are the *same* process:
+> Express serves the REST API under `/api` and the static demo client at `/` on a
+> single port. There is no separate frontend server, no second terminal, and no
+> frontend build step — `npm run dev` (or `npm start`) is all you need.
+
 ### Run with Docker
 
 ```bash
@@ -189,6 +194,40 @@ entitlement exceeds the number of coupons already issued, so you can never mint 
 coupons than milestones reached. Coupons are **store-wide and single-use**: redeeming
 one at a successful checkout marks it spent. See [DECISIONS.md](./DECISIONS.md) for the
 alternatives considered.
+
+---
+
+## Concurrency &amp; scaling
+
+Two invariants must hold no matter how many customers act at once: the global order
+**sequence** stays unique/contiguous, and a coupon is spent **at most once**.
+
+**Within a single process — handled and tested.** Node runs JavaScript on one thread, and
+every service operation here is fully synchronous (no `await` mid-method). So a checkout
+runs *read cart → validate code → append order → mark coupon used* to completion before
+the event loop can start another request. Two simultaneous checkouts therefore cannot
+interleave to claim the same order number or redeem the same coupon twice — no locks
+needed. Idempotency keys add a second layer: a retried/duplicated request returns the
+original order instead of creating a new one. (`StoreService` and `Store` document this;
+tests cover the double-spend and replay cases.)
+
+**Across many processes — the honest limitation.** The in-memory store lives in *one*
+process's heap, so you cannot simply run N instances behind a load balancer — each would
+have its own carts, order counter, and coupons. The current build is deliberately
+**single-node** (the assignment allows in-memory storage). What makes that acceptable is
+that the path to real scale is already designed in:
+
+| Concern at scale            | Where it plugs in (no business logic moves)                          |
+| --------------------------- | -------------------------------------------------------------------- |
+| Shared state across instances | Implement `Store` against Postgres/Redis — swap one class at the composition root |
+| Atomic order sequence       | DB sequence / `INSERT … RETURNING`, or an atomic Redis `INCR`        |
+| Single-use coupon (no double-spend) | A conditional update (`UPDATE … WHERE used = false`) or `SELECT … FOR UPDATE` in a transaction |
+| Idempotency across instances | Persist the idempotency-key → order-id map in the shared store        |
+
+Because the service depends only on the `Store` *interface*, moving from "correct on one
+node" to "correct on many" is an implementation change behind that seam — the domain rules
+and the API stay exactly as they are. That seam existing is the architectural answer to
+"what about many concurrent users?"
 
 ---
 
