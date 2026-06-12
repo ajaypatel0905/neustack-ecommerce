@@ -1,0 +1,110 @@
+{
+  "info": {
+    "name": "Neustack Ecommerce API",
+    "description": "Full flow for the ecommerce store + nth-order discount system. Requests chain via collection variables (cartId, discountCode) captured in test scripts, so you can run them top-to-bottom or via the Collection Runner. Set {{baseUrl}} (default http://localhost:3000/api).",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:3000/api" },
+    { "key": "cartId", "value": "" },
+    { "key": "discountCode", "value": "" }
+  ],
+  "item": [
+    {
+      "name": "Health",
+      "request": { "method": "GET", "url": "{{baseUrl}}/health" }
+    },
+    {
+      "name": "List products",
+      "request": { "method": "GET", "url": "{{baseUrl}}/products" }
+    },
+    {
+      "name": "Create cart",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "const json = pm.response.json();",
+              "pm.collectionVariables.set('cartId', json.id);",
+              "pm.test('cart created', () => pm.expect(pm.response.code).to.eql(201));"
+            ]
+          }
+        }
+      ],
+      "request": { "method": "POST", "url": "{{baseUrl}}/carts" }
+    },
+    {
+      "name": "Add item to cart",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"productId\": \"p_tshirt\",\n  \"quantity\": 2\n}"
+        },
+        "url": "{{baseUrl}}/carts/{{cartId}}/items"
+      }
+    },
+    {
+      "name": "Get cart",
+      "request": { "method": "GET", "url": "{{baseUrl}}/carts/{{cartId}}" }
+    },
+    {
+      "name": "Checkout (no discount)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('order placed', () => pm.expect(pm.response.code).to.eql(201));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "Idempotency-Key", "value": "demo-key-001", "description": "Replay-safe: same key returns the original order." }
+        ],
+        "body": { "mode": "raw", "raw": "{}" },
+        "url": "{{baseUrl}}/carts/{{cartId}}/checkout"
+      }
+    },
+    {
+      "name": "Admin: generate discount code",
+      "description": "Mints a coupon only once the nth-order rule has earned one; otherwise returns 409 DISCOUNT_NOT_ELIGIBLE. Captures the code into {{discountCode}}.",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "if (pm.response.code === 201) {",
+              "  pm.collectionVariables.set('discountCode', pm.response.json().code);",
+              "}"
+            ]
+          }
+        }
+      ],
+      "request": { "method": "POST", "url": "{{baseUrl}}/admin/discount-codes" }
+    },
+    {
+      "name": "Checkout (with discount code)",
+      "description": "Create+fill a new cart first, then run this to redeem {{discountCode}}.",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"discountCode\": \"{{discountCode}}\"\n}"
+        },
+        "url": "{{baseUrl}}/carts/{{cartId}}/checkout"
+      }
+    },
+    {
+      "name": "Admin: stats",
+      "request": { "method": "GET", "url": "{{baseUrl}}/admin/stats" }
+    }
+  ]
+}
