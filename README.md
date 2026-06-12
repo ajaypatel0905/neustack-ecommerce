@@ -1,6 +1,5 @@
 # Ecommerce Store API
 
-[![CI](https://github.com/ajaypatel0905/neustack-ecommerce/actions/workflows/ci.yml/badge.svg)](https://github.com/ajaypatel0905/neustack-ecommerce/actions/workflows/ci.yml)
 ![Node](https://img.shields.io/badge/node-%E2%89%A518-339933?logo=node.js&logoColor=white)
 ![TypeScript](https://img.shields.io/badge/TypeScript-strict-3178c6?logo=typescript&logoColor=white)
 ![Tests](https://img.shields.io/badge/tests-47%20passing-4cd2a0)
