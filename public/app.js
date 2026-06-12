@@ -1,6 +1,6 @@
 /**
- * Demo storefront client. Plain ES modules-free vanilla JS — no framework, no
- * build step. It is a thin client over the REST API at /api: every action maps
+ * Demo storefront client. Plain vanilla JS — no framework, no build step, no
+ * modules. It is a thin client over the REST API at /api: every action maps
  * to one fetch call, and the server remains the single source of truth (we
  * re-fetch the cart after each mutation rather than tracking state locally).
  */
@@ -165,7 +165,7 @@
       cartId = null;
       $('#discount-input').value = '';
       renderCart({ items: [], subtotalCents: 0 });
-      refreshStats();
+      refreshStats().catch(() => {});
     } catch (err) {
       showResult('#order-result', `<strong>Checkout failed</strong><div>${err.message}</div>`, true);
       toast(err.message, true);
@@ -186,7 +186,7 @@
         toast('Code copied into checkout');
       });
       toast('Coupon generated');
-      refreshStats();
+      refreshStats().catch(() => {});
     } catch (err) {
       showResult('#generate-result', `<strong>Not generated</strong><div>${err.message}</div>`, true);
       toast(err.message, true);
