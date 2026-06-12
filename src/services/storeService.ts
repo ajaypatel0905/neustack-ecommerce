@@ -153,7 +153,8 @@ export class StoreService {
       throw new DomainError(
         'DISCOUNT_NOT_ELIGIBLE',
         `Not eligible: ${totalOrders} order(s) placed, ${issued} code(s) issued. ` +
-          `Need ${ordersUntilNext} more order(s) to earn the next coupon (every ${this.config.nthOrder}th order).`,
+          `Need ${ordersUntilNext} more order(s) to earn the next coupon ` +
+          `(1 coupon per ${this.config.nthOrder} orders).`,
       );
     }
 
