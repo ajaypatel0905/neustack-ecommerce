@@ -6,3 +6,6 @@ coverage/
 .env
 .env.local
 *.tsbuildinfo
+
+# parked CI workflow (needs 'workflow' OAuth scope to push)
+.ci-pending/

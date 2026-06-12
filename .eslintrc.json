@@ -20,5 +20,13 @@
     "@typescript-eslint/no-explicit-any": "error",
     "no-console": "off"
   },
+  "overrides": [
+    {
+      "files": ["tests/**/*.ts"],
+      "rules": {
+        "@typescript-eslint/explicit-function-return-type": "off"
+      }
+    }
+  ],
   "ignorePatterns": ["dist/", "node_modules/", "coverage/"]
 }

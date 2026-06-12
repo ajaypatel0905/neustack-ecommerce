@@ -1,12 +1,19 @@
 # Ecommerce Store API
 
+[![CI](https://github.com/ajaypatel0905/neustack-ecommerce/actions/workflows/ci.yml/badge.svg)](https://github.com/ajaypatel0905/neustack-ecommerce/actions/workflows/ci.yml)
+![Node](https://img.shields.io/badge/node-%E2%89%A518-339933?logo=node.js&logoColor=white)
+![TypeScript](https://img.shields.io/badge/TypeScript-strict-3178c6?logo=typescript&logoColor=white)
+![Tests](https://img.shields.io/badge/tests-47%20passing-4cd2a0)
+![License](https://img.shields.io/badge/license-MIT-blue)
+
 A backend for an ecommerce store with a reward-discount system: customers build a
 cart and check out, and **every _n_-th order earns a coupon for _x_% off** that an
 admin can mint and a customer can later redeem at checkout.
 
 Built with **TypeScript + Express**, an **in-memory store** (no database required),
 and a clean **layered architecture** so the business rules are isolated, testable,
-and portable to a real datastore later.
+and portable to a real datastore later. Ships with a small **demo storefront** (no
+build step) so the whole flow can be exercised from a browser.
 
 > The reasoning behind the notable design choices lives in **[DECISIONS.md](./DECISIONS.md)**.
 
@@ -38,6 +45,7 @@ src/
 tests/
   unit/          money · cart · discount · storeService · config
   integration/   api (supertest)
+public/          index.html · styles.css · app.js  (framework-free demo client)
 ```
 
 ---
@@ -49,7 +57,7 @@ tests/
 ```bash
 npm install
 
-# run the test suite (45 tests)
+# run the test suite (47 tests)
 npm test
 npm run test:coverage     # with a coverage report
 
@@ -57,6 +65,16 @@ npm run test:coverage     # with a coverage report
 npm run dev               # hot-reload (ts-node-dev)
 # or
 npm run build && npm start
+```
+
+Then open **http://localhost:3000** for the demo storefront, or hit the API under
+`/api` directly (curl / Postman).
+
+### Run with Docker
+
+```bash
+docker build -t neustack-ecommerce .
+docker run -p 3000:3000 -e NTH_ORDER=3 -e DISCOUNT_PERCENTAGE=10 neustack-ecommerce
 ```
 
 Configuration via environment variables (all optional):
@@ -84,6 +102,7 @@ covers the full flow end to end.
 | Method | Path                          | Purpose                                                       |
 | ------ | ----------------------------- | ------------------------------------------------------------- |
 | `GET`  | `/health`                     | Liveness check                                                |
+| `GET`  | `/config`                     | The reward rule (`nthOrder`, `discountPercentage`)            |
 | `GET`  | `/products`                   | List the seed catalog                                         |
 | `POST` | `/carts`                      | Create an empty cart                                          |
 | `GET`  | `/carts/:cartId`              | View a cart with line items and subtotal                      |
@@ -146,6 +165,23 @@ the HTTP status:
 
 ---
 
+## Demo storefront
+
+A tiny single-page client lives in [`public/`](./public) and is served by the API at
+`http://localhost:3000`. It is intentionally **framework-free vanilla JS with no build
+step** — it just calls `/api` with `fetch`, and treats the server as the source of truth
+(re-fetching the cart after each change rather than mirroring state). From it you can:
+
+- browse the catalog and add items to a cart,
+- check out (with or without a discount code),
+- mint a coupon from the admin panel once the nth-order rule is satisfied,
+- watch live stats (orders, items sold, revenue, discounts) update.
+
+Frontend was optional for this assignment; it's included so the flow can be tested by
+clicking rather than only via curl/Postman.
+
+---
+
 ## How the discount rule works
 
 The store accrues an **entitlement** as orders accumulate: it has earned
@@ -160,7 +196,7 @@ alternatives considered.
 ## Testing
 
 ```bash
-npm test            # 45 unit + integration tests
+npm test            # 47 unit + integration tests
 npm run test:coverage
 npm run typecheck   # tsc --noEmit, strict mode
 npm run lint
